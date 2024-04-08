@@ -71,6 +71,9 @@ class BookGenre(UUIDMixin, CreatedMixin):
 
     class Meta:
         db_table = '"library"."book_genre"'
+        unique_together = (
+            ('book', 'genre'),
+        )
 
 class BookAuthor(UUIDMixin, CreatedMixin):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
@@ -81,3 +84,6 @@ class BookAuthor(UUIDMixin, CreatedMixin):
 
     class Meta:
         db_table = '"library"."book_author"'
+        unique_together = (
+            ('book', 'author'),
+        )
