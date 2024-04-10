@@ -3,6 +3,7 @@ import dotenv
 import os
 from random import randint
 
+from faker import Faker
 
 vars = (
     ('host', 'PG_HOST'),
@@ -28,19 +29,40 @@ cursor = connection.cursor()
 # for genre in genres:
 #     cursor.execute('INSERT INTO library.genre (name, description) VALUES (%s, %s)', genre)
 
-cursor.execute('SELECT id FROM library.genre')
-genres_ids = [row[0] for row in cursor.fetchall()]
+# cursor.execute('SELECT id FROM library.genre')
+# genres_ids = [row[0] for row in cursor.fetchall()]
 
-cursor.execute('SELECT id FROM library.book')
+# cursor.execute('SELECT id FROM library.book')
+# books_ids = [row[0] for row in cursor.fetchall()]
+# if genres_ids:
+#     for book_id in books_ids:
+#         genres = genres_ids.copy()
+#         for _ in range(randint(1, 3)):
+#             cursor.execute(
+#                 'INSERT INTO library.book_genre (book_id, genre_id) VALUES (%s, %s)',
+#                 (book_id, genres.pop(randint(0, len(genres) - 1))),
+#             )
+
+faker = Faker()
+
+for _ in range(500):
+    cursor.execute("INSERT INTO library.author(full_name) values (%s)", (faker.name(),))
+
+
+connection.commit()
+cursor.execute('select id FROM library.author')
+author_ids = [row[0] for row in cursor.fetchall()]
+
+cursor.execute('select id FROM library.book')
 books_ids = [row[0] for row in cursor.fetchall()]
-if genres_ids:
-    for book_id in books_ids:
-        genres = genres_ids.copy()
-        for _ in range(randint(1, 3)):
-            cursor.execute(
-                'INSERT INTO library.book_genre (book_id, genre_id) VALUES (%s, %s)',
-                (book_id, genres.pop(randint(0, len(genres) - 1))),
-            )
+
+for book_id in books_ids:
+    author = author_ids.copy()
+    for _ in range(randint(1, 3)):
+        cursor.execute(
+            'INSERT INTO library.book_author (book_id, author_id) VALUES (%s, %s)',
+            (book_id, author.pop(randint(0, len(author) - 1)))
+        )
 
 cursor.close()
 connection.commit()
