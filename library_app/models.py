@@ -14,19 +14,26 @@ class UUIDMixin(models.Model):
     class Meta:
         abstract = True
 
-def check_date(field_name: str) -> Callable:
-    def validator(dt: datetime) -> None:
-        if dt > get_datetime():
-            raise ValidationError(
-                _('Date and time is bigger than current!'),
-                params={field_name: dt}
-            )
-    return validator
+
+def check_modified(dt: datetime) -> None:
+    if dt > get_datetime():
+        raise ValidationError(
+            _('Date and time is bigger than current!'),
+            params={'modified': dt}
+        )
+
+def check_created(dt: datetime) -> None:
+    if dt > get_datetime():
+        raise ValidationError(
+            _('Date and time is bigger than current!'),
+            params={'created': dt}
+        )
+
 
 class CreatedMixin(models.Model):
     created = models.DateTimeField(
         _('created'), null=True, blank=True,
-        default=get_datetime, validators=[check_date('created')],
+        default=get_datetime, validators=[check_created],
     )
 
     class Meta:
@@ -35,7 +42,7 @@ class CreatedMixin(models.Model):
 class ModifiedMixin(models.Model):
     modified = models.DateTimeField(
         _('modified'), null=True, blank=True,
-        default=get_datetime, validators=[check_date('modified')],
+        default=get_datetime, validators=[check_modified],
     )
 
     class Meta:

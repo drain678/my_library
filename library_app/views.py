@@ -37,7 +37,8 @@ AuthorListView = create_listview(Author, 'authors', 'catalog/authors.html')
     
 def create_view(model, model_name, template):
     def view(request):
-        target = model.objects.get(id=request.GET.get('id', ''))
+        id_ = request.GET.get('id', None)
+        target = model.objects.get(id=id_) if id_ else None
         return render(
             request,
             template,
