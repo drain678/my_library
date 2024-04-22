@@ -2,7 +2,10 @@ from typing import Any
 from django.shortcuts import render
 from django.views.generic import ListView
 from django.core.paginator import Paginator
-from .models import Book, Author, Genre
+from .models import Book, Author, Genre, Client
+from rest_framework.viewsets import ModelViewSet
+from .serializers import BookSerializer, GenreSerializer, AuthorSerializer
+from .forms import RegistrationForm, TestForm
 
 
 def main(request):
@@ -48,3 +51,36 @@ def create_view(model, model_name, template):
 book_view = create_view(Book, 'book', 'entities/book.html')
 author_view = create_view(Author, 'author', 'entities/author.html')
 genre_view = create_view(Genre, 'genre', 'entities/genre.html')
+
+def create_viewset(model_class, serializer):
+    class CustomViewSet(ModelViewSet):
+        queryset = model_class.objects.all()
+        serializer_class = serializer
+
+    return CustomViewSet
+
+BookViewSet = create_viewset(Book, BookSerializer)
+AuthorViewSet = create_viewset(Author, AuthorSerializer)
+GenreViewSet = create_viewset(Genre, GenreSerializer)
+
+def test_form(request):
+    context = {'form': TestForm()}
+    for key in ('text', 'choice', 'number'):
+        context[key] = request.GET.get(key, None)
+        return render(request, 'pages/test_form.html', context)
+    
+def register(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            Client.objects.create(user=user)
+        else:
+            errors = form.errors
+    else:
+        form = RegistrationForm()
+    
+    return render(request, 'regisration/register.html', {
+        'form': form,
+        'errors': errors,
+    })
